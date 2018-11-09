@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get install -y build-essential python apt-utils curl avahi-daemon git libpcap-dev libavahi-compat-libdnssd-dev libfontconfig gnupg2 locales procps libudev-dev unzip sudo wget ffmpeg android-tools-adb android-tools-fastboot
 
-RUN curl -sL https://deb.nodesource.com/setup_6.x | bash
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash
 RUN apt-get install -y nodejs
 
 RUN sed -i '/^rlimit-nproc/s/^\(.*\)/#\1/g' /etc/avahi/avahi-daemon.conf
@@ -17,6 +17,17 @@ ENV TZ Europe/Berlin
 
 RUN mkdir -p /opt/iobroker/ && chmod 777 /opt/iobroker/
 RUN mkdir -p /opt/scripts/ && chmod 777 /opt/scripts/
+RUN mkdir -p /opt/maintenance_scripts && chmod 777 /opt/maintenance_scripts
+
+WORKDIR /opt/maintenance_scripts
+
+ADD maintenance_scripts/iobroker_restart.sh iobroker_restart.sh
+ADD maintenance_scripts/iobroker_stop.sh iobroker_stop.sh
+ADD maintenance_scripts/backup_iobroker_folder.sh backup_iobroker_folder.sh
+ADD maintenance_scripts/enable_multihost.sh enable_multihost.sh
+
+RUN chmod +x iobroker_restart.sh && chmod +x iobroker_stop.sh && chmod +x backup_iobroker_folder.sh && chmod +x enable_multihost.sh
+
 
 WORKDIR /opt/scripts/
 
