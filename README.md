@@ -1,16 +1,71 @@
 # docker-iobroker
 Docker image for ioBroker (http://iobroker.net) based on debian:latest (http://hub.docker.com/_/debian/)
 
-This project creates a Docker image for running ioBroker in a Docker container. It is made for and tested on a Synology Disk Station 1515+ with DSM 6 and Docker-package installed. But it should also work on other systems with Docker!<br>
-Cause the container ist based on debian:latest, it acts nearly like a full virtual machine. That makes it possible to easily add some additional dependies for some ioBroker-Adapters.
+Fork of https://github.com/buanet/docker-iobroker to run on Ubuntu. Added a script to enable multihost support
 
 ## Installation & Usage
 
-A detailed tutorial (german) can be found on my website (https://buanet.de/2017/09/iobroker-unter-docker-auf-der-synology-diskstation/).<br>
-For discussion and support please visit ioBroker-forum-thread (http://forum.iobroker.net/viewtopic.php?f=17&t=5089) or use the comments section at the linked tutorial. Please do not contact me directly for any support-reasons. Every support-question should be answered in a public place. Thank you.
+```
+# Install Docker Comunity Edition
+sudo apt-get update
+sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update
+sudo apt-get install docker-ce
+# Install Local Persist Login
+curl -fsSL https://raw.githubusercontent.com/CWSpear/local-persist/master/scripts/install.sh | sudo bash
+```
+### Sample docker-compose.yml
+```
+version: '2'
 
+services:
+ iobroker:
+    image: castorio/iobroker
+    restart: always
+    privileged: true
+    stdin_open: true
+    tty: true
+    ports:
+      - "1880:1880"  #node-red
+      - "1883:1883"  #mqtt
+      - "8081:8081"  #iobroker admin
+      - "8282:8282"  #flot
+      - "8088:8088"  #terminal
+      - "8284:8284"  #socketIO
+      - "8123:8123"  #homekit
+      - "50005:50005" #Multihost
+      - "9000:9000"  #Multihost
+      - "9001:9001" #Multihost
+
+    devices:
+      - "/dev:/dev"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - iobroker:/opt/iobroker
+    hostname: iobroker-master
+    container_name: iobroker
+    
+
+volumes:
+  iobroker:
+    driver: local-persist
+    driver_opts:
+       mountpoint: /path/to/storage/iobroker
+
+```
+
+For me it just works with local-persist Adapter plugin
+To enable Multihost support just start the included Script. Settings will be persistant on mounted Volume
+```
+/opt/maintenance_scripts/enable_multihost.sh YOURSECRET
+```
 
 ## Changelog
+
+### v1.2.1.1 (2018-11-10)
+* added multihost script
 
 ### v1.2.1beta (2018-09-12)
 * added support for firetv-adapter
@@ -94,3 +149,5 @@ SOFTWARE.
 ## Credits
 
 Inspired by https://github.com/MehrCurry/docker-iobroker
+
+Fork of https://github.com/buanet/docker-iobroker 
