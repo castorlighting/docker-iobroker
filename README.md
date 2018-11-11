@@ -38,12 +38,11 @@ services:
       - "50005:50005" #Multihost
       - "9000:9000"  #Multihost
       - "9001:9001" #Multihost
-
-    devices:
-      - "/dev:/dev"
+      
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - iobroker:/opt/iobroker
+      - /dev/:/dev/
     hostname: iobroker-master
     container_name: iobroker
     
